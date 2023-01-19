@@ -1,8 +1,7 @@
-//! Reactive Programing Library for OpenCV
+#![doc = include_str!("../README.md")]
 pub mod core;
 pub mod imgcodecs;
 pub mod imgproc;
-pub mod ndarray;
 
 pub use crate::core::*;
 

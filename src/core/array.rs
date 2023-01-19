@@ -1,6 +1,6 @@
 use ndarray::Dim;
 
-use crate::core::Mat;
+use super::Mat;
 
 impl<T, const C: usize> From<&Mat<T, C>> for ndarray::Array<T, Dim<[usize; 3]>>
 where
