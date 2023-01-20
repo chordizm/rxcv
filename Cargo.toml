@@ -1,6 +1,6 @@
 [package]
 name = "rxcv"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 authors = ["Chordizm"]
 description = "RxCV provide Rust programming experience to OpenCV."
 categories = ["computer-vision", "api-bindings"]

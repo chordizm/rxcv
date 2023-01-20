@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
@@ -38,6 +39,32 @@ extern "C"
         catch (std::exception &e)
         {
             return -1.0;
+        }
+    }
+
+    bool cv_filter2d(cv::Mat *src, cv::Mat *dst, int ddepth, cv::Mat *kernel, int anchorX, int anchorY, double delta, int borderType)
+    {
+        try
+        {
+            cv::filter2D(*src, *dst, ddepth, *kernel, cv::Point(anchorX, anchorY), delta, borderType);
+            return true;
+        }
+        catch (std::exception &e)
+        {
+            return false;
+        }
+    }
+
+    bool cv_median_blur(cv::Mat *src, cv::Mat *dst, int ksize)
+    {
+        try
+        {
+            cv::medianBlur(*src, *dst, ksize);
+            return true;
+        }
+        catch (std::exception &e)
+        {
+            return false;
         }
     }
 
