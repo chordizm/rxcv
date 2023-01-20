@@ -39,8 +39,13 @@ cv::Mat src = cv::imdecode(data, cv::IMREAD_COLOR), dst;
 auto thresh = cv::threshold(src, dst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 ```
 
-```rust
-let data:&[u8] = /* Some image binary */;
+```rust,ignore
+use rxcv::{
+    imgcodecs::Decode,
+    imgproc::{Threshold, ThresholdTypes},
+    Mat,
+};
+let data:&[u8] = &[1, 2, 3, 4, 5, 6];
 let src = Mat::<u8, 3>::decode(data).unwrap();
 /**
 Not implemented threshold on Mat::<u8, 3>
@@ -66,8 +71,9 @@ std::vector<uchar> data = /* Some binary */;
 cv::Mat src = cv::imdecode(data);
 ```
 
-```rust
-let data:&[u8] = /* Some binary */;
+```rust,ignore
+use rxcv::{imgcodecs::Decode, Mat};
+let data:&[u8] = &[1, 2, 3, 4, 5, 6];
 let src = Mat::<u8, 3>::decode(data).unwrap();
 ```
 
