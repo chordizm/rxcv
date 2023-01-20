@@ -55,6 +55,19 @@ extern "C"
         }
     }
 
+    bool cv_median_blur(cv::Mat *src, cv::Mat *dst, int ksize)
+    {
+        try
+        {
+            cv::medianBlur(*src, *dst, ksize);
+            return true;
+        }
+        catch (std::exception &e)
+        {
+            return false;
+        }
+    }
+
     bool cv_bilateral_filter(cv::Mat *src, cv::Mat *dst, int d, double sigmaColor, double sigmaSpace, int borderType)
     {
         try
