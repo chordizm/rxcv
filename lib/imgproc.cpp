@@ -1,84 +1,175 @@
-#include <iostream>
 #include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include "ffi.hpp"
 
 using namespace std;
 
 typedef std::vector<std::vector<cv::Point>> Contours;
 typedef std::vector<cv::Point> Contour;
 
+template <typename T>
+struct Point_t
+{
+    T x;
+    T y;
+};
+
+template <typename T>
+struct Size_t
+{
+    T width;
+    T height;
+};
+typedef Point_t<int> Point2i;
+typedef Point2i Point;
+typedef Size_t<int> Size2i;
+typedef Size2i Size;
+
 extern "C"
 {
-    struct Point
+    FFIResult<int> cv_bilateral_filter(cv::Mat *src, cv::Mat *dst, int d, double sigmaColor, double sigmaSpace, int borderType)
     {
-        int x;
-        int y;
-    };
-
-    bool cv_cvt_color(cv::Mat *src, cv::Mat *dst, int code)
-    {
-        try
-        {
-            cv::cvtColor(*src, *dst, code);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::bilateralFilter(*src, *dst, d, sigmaColor, sigmaSpace, borderType); return 0; },
+                                -1);
     }
 
-    double cv_threshold(cv::Mat *src, cv::Mat *dst, int thresh, int maxval, int type)
+    FFIResult<int> cv_blur(cv::Mat *src, cv::Mat *dst, Size ksize, Point anchor, int borderType)
     {
-        try
-        {
-            return cv::threshold(*src, *dst, thresh, maxval, type);
-        }
-        catch (std::exception &e)
-        {
-            return -1.0;
-        }
+        return try_execute<int>([&]()
+                                { cv::blur(*src, *dst, cv::Size(ksize.width, ksize.height), cv::Point(anchor.x, anchor.y), borderType); return 0; },
+                                -1);
     }
 
-    bool cv_filter2d(cv::Mat *src, cv::Mat *dst, int ddepth, cv::Mat *kernel, int anchorX, int anchorY, double delta, int borderType)
+    FFIResult<int> cv_box_filter(cv::Mat *src, cv::Mat *dst, int ddepth, Size ksize, Point anchor, bool normalize, int borderType)
     {
-        try
-        {
-            cv::filter2D(*src, *dst, ddepth, *kernel, cv::Point(anchorX, anchorY), delta, borderType);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::boxFilter(*src, *dst, ddepth, cv::Size(ksize.width, ksize.height), cv::Point(anchor.x, anchor.y), normalize, borderType); return 0; },
+                                -1);
     }
 
-    bool cv_median_blur(cv::Mat *src, cv::Mat *dst, int ksize)
+    // TODO: const Scalar & 	borderValue = morphologyDefaultBorderValue()
+    FFIResult<int> cv_dilate(cv::Mat *src, cv::Mat *dst, cv::Mat *kernel, Point anchor, int iterations, int borderType)
     {
-        try
-        {
-            cv::medianBlur(*src, *dst, ksize);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::dilate(*src, *dst, *kernel, cv::Point(anchor.x, anchor.y), iterations, borderType); return 0; },
+                                -1);
     }
 
-    bool cv_bilateral_filter(cv::Mat *src, cv::Mat *dst, int d, double sigmaColor, double sigmaSpace, int borderType)
+    // TODO: const Scalar & 	borderValue = morphologyDefaultBorderValue()
+    FFIResult<int> cv_erode(cv::Mat *src, cv::Mat *dst, cv::Mat *kernel, Point anchor, int iterations, int borderType)
     {
-        try
-        {
-            cv::bilateralFilter(*src, *dst, d, sigmaColor, sigmaSpace, borderType);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::erode(*src, *dst, *kernel, cv::Point(anchor.x, anchor.y), iterations, borderType); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_filter2d(cv::Mat *src, cv::Mat *dst, int ddepth, cv::Mat *kernel, int anchorX, int anchorY, double delta, int borderType)
+    {
+        return try_execute<int>([&]()
+                                { cv::filter2D(*src, *dst, ddepth, *kernel, cv::Point(anchorX, anchorY), delta, borderType); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_gaussian_blur(cv::Mat *src, cv::Mat *dst, Size ksize, double sigma_x, double sigma_y, int borderType)
+    {
+        return try_execute<int>([&]()
+                                { cv::GaussianBlur(*src, *dst, cv::Size(ksize.width, ksize.height), sigma_x, sigma_y, borderType); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_laplacian(cv::Mat *src, cv::Mat *dst, int ddepth, int ksize, double scale, double delta, int borderType)
+    {
+        return try_execute<int>([&]()
+                                { cv::Laplacian(*src, *dst ,ddepth, ksize, scale, delta, borderType); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_median_blur(cv::Mat *src, cv::Mat *dst, int ksize)
+    {
+        return try_execute<int>([&]()
+                                { cv::medianBlur(*src, *dst, ksize); return 0; },
+                                -1);
+    }
+
+    // TODO: const Scalar & 	borderValue = morphologyDefaultBorderValue()
+    FFIResult<int> cv_morphology_ex(cv::Mat *src, cv::Mat *dst, int op, cv::Mat *kernel, Point anchor, int iterations, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::morphologyEx(*src, *dst, op, *kernel, cv::Point(anchor.x, anchor.y), iterations, border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_pyr_down(cv::Mat *src, cv::Mat *dst, Size dstsize, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::pyrDown(*src, *dst, cv::Size(dstsize.width, dstsize.height), border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_pyr_up(cv::Mat *src, cv::Mat *dst, Size dstsize, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::pyrUp(*src, *dst, cv::Size(dstsize.width, dstsize.height), border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_scharr(cv::Mat *src, cv::Mat *dst, int ddepth, int dx, int dy, double scale, double delta, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::Scharr(*src, *dst, ddepth, dx, dy, scale, delta, border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_sep_filter2d(cv::Mat *src, cv::Mat *dst, int ddepth, cv::Mat *kernel_x, cv::Mat *kernel_y, Point anchor, double delta, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::sepFilter2D(*src, *dst, ddepth, *kernel_x, *kernel_y, cv::Point(anchor.x, anchor.y), delta, border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_sobel(cv::Mat *src, cv::Mat *dst, int ddepth, int dx, int dy, int ksize, double scale, double delta, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::Sobel(*src, *dst, ddepth, dx, dy, ksize, scale, delta, border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_spatial_gradient(cv::Mat *src, cv::Mat *dx, cv::Mat *dy, int ksize, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::spatialGradient(*src, *dx, *dy, ksize, border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_sqr_box_filter(cv::Mat *src, cv::Mat *dst, int ddepth, Size ksize, Point anchor, bool normalize, int border_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::sqrBoxFilter(*src, *dst, ddepth, cv::Size(ksize.width, ksize.height), cv::Point(anchor.x, anchor.y), normalize, border_type); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_cvt_color(cv::Mat *src, cv::Mat *dst, int code)
+    {
+        return try_execute<int>([&]()
+                                { cv::cvtColor(*src, *dst, code); return 0; },
+                                -1);
+    }
+
+    FFIResult<double> cv_threshold(cv::Mat *src, cv::Mat *dst, int thresh, int maxval, int type)
+    {
+        return try_execute<double>([&]()
+                                   { return cv::threshold(*src, *dst, thresh, maxval, type); },
+                                   0);
+    }
+
+    FFIResult<int> cv_find_contours(cv::Mat *src, Contours *contours, int mode, int method)
+    {
+        return try_execute<int>([&]()
+                                { cv::findContours(*src, *contours, mode, method); return 0; },
+                                -1);
     }
 
     Contours *cv_new_contours()
@@ -120,19 +211,6 @@ extern "C"
     void cv_release_contour(Contour *contour)
     {
         delete contour;
-    }
-
-    bool cv_find_contours(cv::Mat *src, Contours *contours, int mode, int method)
-    {
-        try
-        {
-            cv::findContours(*src, *contours, mode, method);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
     }
 
     double cv_contour_area(Contour *contour)

@@ -1,3 +1,4 @@
+use super::Point;
 use std::ops::Index;
 use std::slice::SliceIndex;
 
@@ -20,12 +21,6 @@ mod ffi {
         pub(super) fn cv_contour_area(contour: *const ContourPointer) -> f64;
         pub(super) fn cv_contour_arc_length(contour: *const ContourPointer, closed: bool) -> f64;
     }
-}
-
-#[repr(C)]
-pub struct Point {
-    pub x: i32,
-    pub y: i32,
 }
 
 pub(crate) enum ContourPointer {}

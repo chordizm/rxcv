@@ -1,52 +1,40 @@
 use super::consts::ImreadModes;
-use crate::core::Mat;
+use crate::{core::Mat, result::Result};
 use std::ffi::CString;
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
     use std::ffi::c_char;
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
-        pub(super) fn cv_imread(path: *const c_char, flags: i32) -> *const MatPointer;
+        pub(super) fn cv_imread(path: *const c_char, flags: i32) -> FFIResult<*const MatPointer>;
     }
 }
 
-pub trait Read {
-    fn read(path: &str) -> Result<Self, &'static str>
-    where
-        Self: Sized;
-}
-
-impl Read for Mat<u8, 1> {
-    fn read(path: &str) -> Result<Self, &'static str>
+impl Mat<u8, 1> {
+    pub fn read(path: &str) -> Result<Self>
     where
         Self: Sized,
     {
         let path = CString::new(path).unwrap();
         let path = path.as_ptr();
-        let p = unsafe { ffi::cv_imread(path, ImreadModes::IMREAD_GRAYSCALE.bits()) };
-        if p.is_null() {
-            Err("Pointer is null.")
-        } else {
-            Ok(Mat::new(p))
-        }
+        let pointer =
+            Result::from(unsafe { ffi::cv_imread(path, ImreadModes::IMREAD_GRAYSCALE.bits()) })?;
+        Ok(Mat::from_ptr(pointer))
     }
 }
 
-impl Read for Mat<u8, 3> {
-    fn read(path: &str) -> Result<Self, &'static str>
+impl Mat<u8, 3> {
+    pub fn read(path: &str) -> Result<Self>
     where
         Self: Sized,
     {
         let path = CString::new(path).unwrap();
         let path = path.as_ptr();
-        let p = unsafe { ffi::cv_imread(path, ImreadModes::IMREAD_COLOR.bits()) };
-        if p.is_null() {
-            Err("Pointer is null.")
-        } else {
-            Ok(Mat::new(p))
-        }
+        let pointer =
+            Result::from(unsafe { ffi::cv_imread(path, ImreadModes::IMREAD_COLOR.bits()) })?;
+        Ok(Mat::from_ptr(pointer))
     }
 }
 

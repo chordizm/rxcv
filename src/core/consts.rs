@@ -67,6 +67,30 @@ bitflags! {
     }
 }
 
+#[repr(C)]
+pub struct PointBase<T> {
+    pub x: T,
+    pub y: T,
+}
+
+pub type Point2i = PointBase<i32>;
+pub type Point = Point2i;
+
+impl Default for Point {
+    fn default() -> Self {
+        Self { x: -1, y: -1 }
+    }
+}
+
+#[repr(C)]
+pub struct SizeT<T> {
+    pub width: T,
+    pub height: T,
+}
+
+pub type Size2i = SizeT<i32>;
+pub type Size = Size2i;
+
 #[cfg(test)]
 mod tests {
     use super::*;

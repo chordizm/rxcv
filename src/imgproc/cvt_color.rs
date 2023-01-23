@@ -1,8 +1,8 @@
 use super::consts::ColorConversionCodes;
-use crate::core::Mat;
+use crate::{core::Mat, result::Result};
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -10,62 +10,47 @@ mod ffi {
             src: *const MatPointer,
             dst: *const MatPointer,
             code: i32,
-        ) -> bool;
+        ) -> FFIResult<i32>;
     }
 }
 
-pub trait CvtColor {
-    fn cvt_color(&self, code: ColorConversionCodes) -> Result<Self, &'static str>
-    where
-        Self: Sized;
-}
-
 impl<T> Mat<T, 3> {
-    pub fn cvt_color_bgr2gray(&self) -> Result<Mat<T, 1>, &'static str> {
-        let dst = Mat::default();
-        if unsafe {
+    pub fn cvt_color_bgr2gray(&self) -> Result<Mat<T, 1>> {
+        let dst = Mat::new()?;
+        Result::from(unsafe {
             ffi::cv_cvt_color(
                 self.pointer,
                 dst.pointer,
                 ColorConversionCodes::COLOR_BGR2GRAY.bits(),
             )
-        } {
-            Ok(dst)
-        } else {
-            Err("Failed to operation.")
-        }
+        })?;
+        Ok(dst)
     }
 
-    pub fn cvt_color_bgr2hsv(&self) -> Result<Self, &'static str> {
-        let dst = Mat::default();
-        if unsafe {
+    pub fn cvt_color_bgr2hsv(&self) -> Result<Self> {
+        let dst = Mat::new()?;
+        Result::from(unsafe {
             ffi::cv_cvt_color(
                 self.pointer,
                 dst.pointer,
                 ColorConversionCodes::COLOR_BGR2HSV.bits(),
             )
-        } {
-            Ok(dst)
-        } else {
-            Err("Failed to operation.")
-        }
+        })?;
+        Ok(dst)
     }
 }
 
 impl<T> Mat<T, 1> {
-    pub fn cvt_color_gray2bgr(&self) -> Result<Mat<T, 3>, &'static str> {
-        let dst = Mat::default();
-        if unsafe {
+    pub fn cvt_color_gray2bgr(&self) -> Result<Mat<T, 3>> {
+        let dst = Mat::new()?;
+        Result::from(unsafe {
             ffi::cv_cvt_color(
                 self.pointer,
                 dst.pointer,
                 ColorConversionCodes::COLOR_GRAY2BGR.bits(),
             )
-        } {
-            Ok(dst)
-        } else {
-            Err("Failed to operation.")
-        }
+        })?;
+        Ok(dst)
     }
 }
 

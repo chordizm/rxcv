@@ -1,8 +1,4 @@
-use rxcv::{
-    imgcodecs::Decode,
-    imgproc::{Threshold, ThresholdTypes},
-    Mat,
-};
+use rxcv::{imgproc::ThresholdTypes, Mat};
 
 fn main() {
     let data = include_bytes!("../mock/lenna.png");

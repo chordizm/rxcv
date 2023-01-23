@@ -1,9 +1,9 @@
 //! This module provide cv::threshold
 use super::consts::ThresholdTypes;
-use crate::core::Mat;
+use crate::{core::Mat, result::Result};
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -13,41 +13,26 @@ mod ffi {
             thresh: i32,
             maxval: i32,
             r#type: i32,
-        ) -> f64;
+        ) -> FFIResult<f64>;
     }
 }
 
-pub trait Threshold {
-    fn threshold(
-        &self,
-        thresh: i32,
-        max_value: i32,
-        r#type: ThresholdTypes,
-    ) -> Result<(f64, Self), &'static str>
-    where
-        Self: Sized;
-}
-
-impl<T> Threshold for Mat<T, 1> {
+impl<T> Mat<T, 1> {
     //! Single channel Mat can use threshold method.
-    fn threshold(
+    pub fn threshold(
         &self,
         thresh: i32,
         max_value: i32,
         r#type: ThresholdTypes,
-    ) -> Result<(f64, Self), &'static str>
+    ) -> Result<(f64, Self)>
     where
         Self: Sized,
     {
-        let dst = Mat::default();
-        let value = unsafe {
+        let dst = Mat::new()?;
+        let value = Result::from(unsafe {
             ffi::cv_threshold(self.pointer, dst.pointer, thresh, max_value, r#type.bits())
-        };
-        if value < 0.0 {
-            Err("Failed to operation.")
-        } else {
-            Ok((value, dst))
-        }
+        })?;
+        Ok((value, dst))
     }
 }
 

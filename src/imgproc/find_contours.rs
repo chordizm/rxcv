@@ -2,7 +2,10 @@ use super::consts::{ContourApproximationModes, RetrievalModes};
 use crate::core::{Contours, Mat};
 
 mod ffi {
-    use crate::core::{ContoursPointer, MatPointer};
+    use crate::{
+        core::{ContoursPointer, MatPointer},
+        ffi::FFIResult,
+    };
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -11,20 +14,12 @@ mod ffi {
             contours: *const ContoursPointer,
             mode: i32,
             method: i32,
-        ) -> bool;
+        ) -> FFIResult<i32>;
     }
 }
 
-pub trait FindContours {
-    fn find_contours(
-        &self,
-        mode: RetrievalModes,
-        method: ContourApproximationModes,
-    ) -> Result<Contours, &'static str>;
-}
-
-impl<T> FindContours for Mat<T, 1> {
-    fn find_contours(
+impl<T> Mat<T, 1> {
+    pub fn find_contours(
         &self,
         mode: RetrievalModes,
         method: ContourApproximationModes,
@@ -33,14 +28,11 @@ impl<T> FindContours for Mat<T, 1> {
         Self: Sized,
     {
         let mut contours = Contours::default();
-        if unsafe {
+        Result::from(unsafe {
             ffi::cv_find_contours(self.pointer, contours.pointer, mode.bits(), method.bits())
-        } {
-            contours.inner = contours.get_inner();
-            Ok(contours)
-        } else {
-            Err("Failed to find contours.")
-        }
+        })?;
+        contours.inner = contours.get_inner();
+        Ok(contours)
     }
 }
 
