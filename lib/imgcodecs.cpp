@@ -2,60 +2,36 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 
+#include "ffi.hpp"
+
+using MatResult = FFIResult<cv::Mat *>;
 using namespace std;
 
 extern "C"
 {
-    bool cv_imwrite(cv::Mat *img, const char *path)
+    FFIResult<void *> cv_imwrite(cv::Mat *img, const char *path)
     {
-        try
-        {
-            return cv::imwrite(path, *img);
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<void *>([&]()
+                                   { cv::imwrite(path, *img); return nullptr; });
     }
 
-    cv::Mat *cv_imread(const char *path, int flags)
+    MatResult cv_imread(const char *path, int flags)
     {
-        try
-        {
-            auto img = cv::imread(path, flags);
-            return new cv::Mat(img);
-        }
-        catch (std::exception &e)
-        {
-            return nullptr;
-        }
+        return try_execute<cv::Mat *>([&]()
+                                      { return new cv::Mat(cv::imread(path, flags)); });
     }
 
-    bool cv_imencode(cv::Mat *img, std::vector<uchar> *dst, char *ext)
+    FFIResult<void *> cv_imencode(cv::Mat *img, std::vector<uchar> *dst, char *ext)
     {
-        try
-        {
-            cv::imencode(ext, *img, *dst);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<void *>([&]()
+                                   { cv::imencode(ext, *img, *dst); return nullptr; });
     }
 
-    cv::Mat *cv_imdecode(uchar *data, int size, int flags)
+    MatResult cv_imdecode(uchar *data, int size, int flags)
     {
-        try
-        {
-            vector<uchar> bytes(data, data + size);
-            auto img = cv::imdecode(bytes, flags);
-            return new cv::Mat(img);
-        }
-        catch (std::exception &e)
-        {
-            return nullptr;
-        }
+        vector<uchar> bytes(data, data + size);
+        return try_execute<cv::Mat *>([&]()
+                                      { return new cv::Mat(cv::imdecode(bytes, flags)); });
     }
 
     std::vector<uchar> *cv_new_bytes()

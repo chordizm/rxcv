@@ -1,28 +1,35 @@
 #include <vector>
 #include <opencv2/core.hpp>
+#include "ffi.hpp"
+
+using MatResult = FFIResult<cv::Mat *>;
 
 using namespace std;
 
 extern "C"
 {
-    cv::Mat *cv_new_mat()
+    MatResult cv_new_mat()
     {
-        return new cv::Mat();
+        return try_execute<cv::Mat *>([&]()
+                                      { return new cv::Mat(); });
     }
 
-    cv::Mat *cv_mat_from_shape(int rows, int cols, int type)
+    MatResult cv_mat_from_shape(int rows, int cols, int type)
     {
-        return new cv::Mat(cv::Size(cols, rows), type);
+        return try_execute<cv::Mat *>([&]()
+                                      { return new cv::Mat(cv::Size(cols, rows), type); });
     }
 
-    cv::Mat *cv_mat_from_shape_vec(int rows, int cols, int type, void *src)
+    MatResult cv_mat_from_shape_vec(int rows, int cols, int type, void *data)
     {
-        return new cv::Mat(cv::Size(cols, rows), type, src);
+        return try_execute<cv::Mat *>([&]()
+                                      { return new cv::Mat(cv::Size(cols, rows), type, data); });
     }
 
-    cv::Mat *cv_mat_ones(int rows, int cols, int type)
+    MatResult cv_mat_ones(int rows, int cols, int type)
     {
-        return new cv::Mat(cv::Mat::ones(cv::Size(cols, rows), type));
+        return try_execute<cv::Mat *>([&]()
+                                      { return new cv::Mat(cv::Mat::ones(cv::Size(cols, rows), type)); });
     }
 
     int cv_mat_type(cv::Mat *pointer)
