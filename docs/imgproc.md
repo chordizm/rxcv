@@ -28,9 +28,7 @@
 | Sobel                        |   ○    |
 | spatialGradient              |   ○    |
 | sqrBoxFilter                 |   ○    |
-| stackBlur                    |   ○    |
-
-!Depth combinations currently supported -1.
+| stackBlur                    |        |
 
 ## Geometric Image Transformations
 

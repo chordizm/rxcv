@@ -24,10 +24,23 @@ mod ffi {
     }
 }
 
+pub trait SqrBoxFilter
+where
+    Self: Sized,
+{
+    fn sqr_box_filter(
+        &self,
+        ksize: Size,
+        anchor: Point,
+        normalize: bool,
+        border_type: BorderTypes,
+    ) -> Result<Self>;
+}
+
 macro_rules! impl_sqr_box_filter {
     ($t:ty, $c:tt, $ddepth:expr) => {
-        impl Mat<$t, $c> {
-            pub fn sqr_box_filter(
+        impl SqrBoxFilter for Mat<$t, $c> {
+            fn sqr_box_filter(
                 &self,
                 ksize: Size,
                 anchor: Point,

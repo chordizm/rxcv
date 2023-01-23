@@ -14,10 +14,17 @@ mod ffi {
     }
 }
 
+pub trait PyrUp
+where
+    Self: Sized,
+{
+    fn pyr_up(&self, dstsize: Size, border_type: BorderTypes) -> Result<Self>;
+}
+
 macro_rules! impl_pyr_up {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn pyr_up(&self, dstsize: Size, border_type: BorderTypes) -> Result<Self>
+        impl PyrUp for Mat<$t, $c> {
+            fn pyr_up(&self, dstsize: Size, border_type: BorderTypes) -> Result<Self>
             where
                 Self: Sized,
             {

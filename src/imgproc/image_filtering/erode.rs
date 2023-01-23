@@ -23,10 +23,23 @@ mod ffi {
     }
 }
 
+pub trait Erode
+where
+    Self: Sized,
+{
+    fn erode(
+        &self,
+        kernel: Mat<u8, 1>,
+        anchor: Point,
+        iterations: i32,
+        border_type: BorderTypes,
+    ) -> Result<Self>;
+}
+
 macro_rules! impl_erode {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn erode(
+        impl Erode for Mat<$t, $c> {
+            fn erode(
                 &self,
                 kernel: Mat<u8, 1>,
                 anchor: Point,

@@ -23,7 +23,9 @@ fn main() {
         .flag("--std=c++17")
         .flag("-v")
         .flag("-g")
-        .include(env::var("OPENCV_INCLUDE_DIR").unwrap_or("/usr/include/opencv4".to_string()))
+        .include(
+            env::var("OPENCV_INCLUDE_DIR").unwrap_or_else(|_| "/usr/include/opencv4".to_string()),
+        )
         .include("include")
         .compile("rxcv");
     println!(

@@ -22,10 +22,17 @@ mod ffi {
     }
 }
 
+pub trait Blur
+where
+    Self: Sized,
+{
+    fn blur(&self, ksize: Size, anchor: Point, border_type: BorderTypes) -> Result<Self>;
+}
+
 macro_rules! impl_blur {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn blur(&self, ksize: Size, anchor: Point, border_type: BorderTypes) -> Result<Self>
+        impl Blur for Mat<$t, $c> {
+            fn blur(&self, ksize: Size, anchor: Point, border_type: BorderTypes) -> Result<Self>
             where
                 Self: Sized,
             {

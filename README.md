@@ -41,7 +41,7 @@ auto thresh = cv::threshold(src, dst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTS
 
 ```rust,ignore
 use rxcv::{
-    imgproc::{ThresholdTypes},
+    imgproc::{Threshold, ThresholdTypes},
     Mat,
 };
 let data:&[u8] = &[1, 2, 3, 4, 5, 6];

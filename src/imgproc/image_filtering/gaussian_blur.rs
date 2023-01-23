@@ -23,10 +23,23 @@ mod ffi {
     }
 }
 
+pub trait GaussianBlur
+where
+    Self: Sized,
+{
+    fn gaussian_blur(
+        &self,
+        ksize: Size,
+        sigma_x: f64,
+        sigma_y: f64,
+        border_type: BorderTypes,
+    ) -> Result<Self>;
+}
+
 macro_rules! impl_gaussian_blur {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn gaussian_blur(
+        impl GaussianBlur for Mat<$t, $c> {
+            fn gaussian_blur(
                 &self,
                 ksize: Size,
                 sigma_x: f64,
