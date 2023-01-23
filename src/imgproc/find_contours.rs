@@ -18,16 +18,8 @@ mod ffi {
     }
 }
 
-pub trait FindContours {
-    fn find_contours(
-        &self,
-        mode: RetrievalModes,
-        method: ContourApproximationModes,
-    ) -> Result<Contours, &'static str>;
-}
-
-impl<T> FindContours for Mat<T, 1> {
-    fn find_contours(
+impl<T> Mat<T, 1> {
+    pub fn find_contours(
         &self,
         mode: RetrievalModes,
         method: ContourApproximationModes,
