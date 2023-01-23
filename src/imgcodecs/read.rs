@@ -12,14 +12,8 @@ mod ffi {
     }
 }
 
-pub trait Read {
-    fn read(path: &str) -> Result<Self>
-    where
-        Self: Sized;
-}
-
-impl Read for Mat<u8, 1> {
-    fn read(path: &str) -> Result<Self>
+impl Mat<u8, 1> {
+    pub fn read(path: &str) -> Result<Self>
     where
         Self: Sized,
     {
@@ -31,8 +25,8 @@ impl Read for Mat<u8, 1> {
     }
 }
 
-impl Read for Mat<u8, 3> {
-    fn read(path: &str) -> Result<Self>
+impl Mat<u8, 3> {
+    pub fn read(path: &str) -> Result<Self>
     where
         Self: Sized,
     {

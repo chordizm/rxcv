@@ -7,10 +7,8 @@ impl<T> From<FFIResult<T>> for Result<T> {
         if value.error.is_null() {
             Ok(value.ok)
         } else {
-            match unsafe { std::ffi::CStr::from_ptr(value.error) }.to_str() {
-                Ok(msg) => Err(msg),
-                Err(_) => Err(""),
-            }
+            //TODO: Error message forwarding.
+            Err("Error")
         }
     }
 }

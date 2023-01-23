@@ -345,3 +345,16 @@ bitflags! {
         const CHAIN_APPROX_TC89_KCOS = 4;
     }
 }
+
+bitflags! {
+    pub struct  MorphTypes: i32{
+        const MORPH_ERODE    = 0;
+        const MORPH_DILATE   = 1;
+        const MORPH_OPEN     = 2;
+        const MORPH_CLOSE    = 3;
+        const MORPH_GRADIENT = 4;
+        const MORPH_TOPHAT   = 5;
+        const MORPH_BLACKHAT = 6;
+        const MORPH_HITMISS  = 7;
+    }
+}

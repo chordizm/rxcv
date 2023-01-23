@@ -47,42 +47,34 @@ macro_rules! impl_birateral_filter {
 }
 
 impl_birateral_filter!(u8, 1);
-impl_birateral_filter!(u8, 2);
 impl_birateral_filter!(u8, 3);
 impl_birateral_filter!(f32, 1);
 impl_birateral_filter!(f32, 3);
 
 #[cfg(test)]
 mod tests {
-    use crate::imgcodecs::Read;
 
     use super::*;
-
-    #[test]
-    fn bilateral_filter_8uc3_test() {
-        let src = Mat::<u8, 3>::read("mock/lenna.png").unwrap();
-        assert_eq!(src.cols(), 512);
-        assert_eq!(src.rows(), 512);
-        assert_eq!(src.channels(), 3);
-        let dst = src
-            .bilateral_filter(15, 20., 20., BorderTypes::BORDER_DEFAULT)
-            .unwrap();
-        assert_eq!(src.cols(), dst.cols());
-        assert_eq!(src.rows(), dst.rows());
-        assert_eq!(src.channels(), dst.channels());
+    macro_rules! bilateral_test {
+        ($name:ident, $t: ty, $c: tt) => {
+            #[test]
+            fn $name() {
+                let src = Mat::<$t, $c>::from_shape(32, 32).unwrap();
+                assert_eq!(src.cols(), 32);
+                assert_eq!(src.rows(), 32);
+                assert_eq!(src.channels(), $c);
+                let dst = src
+                    .bilateral_filter(15, 20., 20., BorderTypes::BORDER_DEFAULT)
+                    .unwrap();
+                assert_eq!(src.cols(), dst.cols());
+                assert_eq!(src.rows(), dst.rows());
+                assert_eq!(src.channels(), dst.channels());
+            }
+        };
     }
 
-    #[test]
-    fn bilateral_filter_8uc1_test() {
-        let src = Mat::<u8, 1>::read("mock/lenna.png").unwrap();
-        assert_eq!(src.cols(), 512);
-        assert_eq!(src.rows(), 512);
-        assert_eq!(src.channels(), 1);
-        let dst = src
-            .bilateral_filter(15, 20., 20., BorderTypes::BORDER_DEFAULT)
-            .unwrap();
-        assert_eq!(src.cols(), dst.cols());
-        assert_eq!(src.rows(), dst.rows());
-        assert_eq!(src.channels(), dst.channels());
-    }
+    bilateral_test!(bilateral_8uc1_test, u8, 1);
+    bilateral_test!(bilateral_8uc3_test, u8, 3);
+    bilateral_test!(bilateral_32fc1_test, f32, 1);
+    bilateral_test!(bilateral_32fc3_test, f32, 3);
 }
