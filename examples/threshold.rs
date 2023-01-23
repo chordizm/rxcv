@@ -1,5 +1,4 @@
 use rxcv::{
-    imgcodecs::Decode,
     imgproc::{Threshold, ThresholdTypes},
     Mat,
 };

@@ -1,48 +1,38 @@
 use super::consts::ImreadModes;
-use crate::core::Mat;
+use crate::{core::Mat, result::Result};
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
-        pub(super) fn cv_imdecode(data: *const u8, size: usize, flags: i32) -> *const MatPointer;
+        pub(super) fn cv_imdecode(
+            data: *const u8,
+            size: usize,
+            flags: i32,
+        ) -> FFIResult<*const MatPointer>;
     }
 }
 
-pub trait Decode {
-    fn decode(data: &[u8]) -> Result<Self, &'static str>
-    where
-        Self: Sized;
-}
-
-impl Decode for Mat<u8, 1> {
-    fn decode(data: &[u8]) -> Result<Self, &'static str> {
-        let p = unsafe {
+impl Mat<u8, 1> {
+    pub fn decode(data: &[u8]) -> Result<Self> {
+        let pointer = Result::from(unsafe {
             ffi::cv_imdecode(
                 data.as_ptr(),
                 data.len(),
                 ImreadModes::IMREAD_GRAYSCALE.bits(),
             )
-        };
-        if p.is_null() {
-            Err("Pointer is null.")
-        } else {
-            Ok(Mat::new(p))
-        }
+        })?;
+        Ok(Mat::from_ptr(pointer))
     }
 }
 
-impl Decode for Mat<u8, 3> {
-    fn decode(data: &[u8]) -> Result<Self, &'static str> {
-        let p = unsafe {
+impl Mat<u8, 3> {
+    pub fn decode(data: &[u8]) -> Result<Self> {
+        let pointer = Result::from(unsafe {
             ffi::cv_imdecode(data.as_ptr(), data.len(), ImreadModes::IMREAD_COLOR.bits())
-        };
-        if p.is_null() {
-            Err("Pointer is null.")
-        } else {
-            Ok(Mat::new(p))
-        }
+        })?;
+        Ok(Mat::from_ptr(pointer))
     }
 }
 

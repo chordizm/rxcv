@@ -1,4 +1,4 @@
-use rxcv::{imgcodecs::Decode, Mat};
+use rxcv::Mat;
 
 fn main() {
     let data = include_bytes!("../mock/lenna.png");

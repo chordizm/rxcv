@@ -1,21 +1,32 @@
 use std::marker::PhantomData;
 
+use crate::result::Result;
+
 use super::consts::*;
 
 mod ffi {
     use super::MatPointer;
+    use crate::ffi::FFIResult;
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
-        pub(super) fn cv_new_mat() -> *const MatPointer;
-        pub(super) fn cv_mat_ones(rows: i32, cols: i32, r#type: i32) -> *const MatPointer;
-        pub(super) fn cv_mat_from_shape(rows: i32, cols: i32, r#type: i32) -> *const MatPointer;
+        pub(super) fn cv_new_mat() -> FFIResult<*const MatPointer>;
+        pub(super) fn cv_mat_ones(
+            rows: i32,
+            cols: i32,
+            r#type: i32,
+        ) -> FFIResult<*const MatPointer>;
+        pub(super) fn cv_mat_from_shape(
+            rows: i32,
+            cols: i32,
+            r#type: i32,
+        ) -> FFIResult<*const MatPointer>;
         pub(super) fn cv_mat_from_shape_vec(
             rows: i32,
             cols: i32,
             r#type: i32,
             src: *const std::ffi::c_void,
-        ) -> *const MatPointer;
+        ) -> FFIResult<*const MatPointer>;
         pub(super) fn cv_mat_type(pointer: *const MatPointer) -> i32;
         pub(super) fn cv_mat_data(pointer: *const MatPointer) -> *const std::ffi::c_void;
         pub(super) fn cv_mat_size(pointer: *const MatPointer) -> i32;
@@ -33,214 +44,64 @@ pub struct Mat<T, const C: usize> {
     data_type: PhantomData<T>,
 }
 
-impl<const C: usize> From<(usize, usize)> for Mat<u8, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_8U, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize)> for Mat<i8, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_8S, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize)> for Mat<u16, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_16U, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize)> for Mat<i16, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_16S, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize)> for Mat<i32, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_32S, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize)> for Mat<f32, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_32F, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize)> for Mat<f64, C> {
-    fn from((rows, cols): (usize, usize)) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_64F, C as i32),
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[u8])> for Mat<u8, C> {
-    fn from((rows, cols, src): (usize, usize, &[u8])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_8U, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[i8])> for Mat<i8, C> {
-    fn from((rows, cols, src): (usize, usize, &[i8])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_8S, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[u16])> for Mat<u16, C> {
-    fn from((rows, cols, src): (usize, usize, &[u16])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_16U, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[i16])> for Mat<i16, C> {
-    fn from((rows, cols, src): (usize, usize, &[i16])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_16S, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[i32])> for Mat<i32, C> {
-    fn from((rows, cols, src): (usize, usize, &[i32])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_32S, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[f32])> for Mat<f32, C> {
-    fn from((rows, cols, src): (usize, usize, &[f32])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_32F, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-impl<const C: usize> From<(usize, usize, &[f64])> for Mat<f64, C> {
-    fn from((rows, cols, src): (usize, usize, &[f64])) -> Self {
-        Self::new(unsafe {
-            ffi::cv_mat_from_shape_vec(
-                rows as i32,
-                cols as i32,
-                make_type(DataTypes::CV_64F, C as i32),
-                src.as_ptr() as *const std::ffi::c_void,
-            )
-        })
-    }
-}
-
-pub trait FromShape {
-    fn from_shape(rows: i32, cols: i32) -> Self;
-}
-
-pub trait Ones {
-    fn ones(rows: i32, cols: i32) -> Self;
-}
-
-macro_rules! impl_mat_initializer {
+macro_rules! impl_mat {
     ($t:ty, $c:tt, $code:expr) => {
-        impl FromShape for Mat<$t, $c> {
-            fn from_shape(rows: i32, cols: i32) -> Self {
-                Self::new(unsafe { ffi::cv_mat_from_shape(rows, cols, $code.bits()) })
+        impl Mat<$t, $c> {
+            pub fn from_shape(rows: usize, cols: usize) -> Result<Self> {
+                let pointer = Result::<*const MatPointer>::from(unsafe {
+                    ffi::cv_mat_from_shape(rows as i32, cols as i32, make_type($code, $c as i32))
+                })?;
+                Ok(Mat::<$t, $c>::from_ptr(pointer))
             }
-        }
-
-        impl Ones for Mat<$t, $c> {
-            fn ones(rows: i32, cols: i32) -> Self {
-                Self::new(unsafe { ffi::cv_mat_ones(rows, cols, $code.bits()) })
+            pub fn from_shape_vec(rows: usize, cols: usize, data: &[$t]) -> Result<Self> {
+                let pointer = Result::<*const MatPointer>::from(unsafe {
+                    ffi::cv_mat_from_shape_vec(
+                        rows as i32,
+                        cols as i32,
+                        make_type($code, $c as i32),
+                        data.as_ptr() as *const std::ffi::c_void,
+                    )
+                })?;
+                Ok(Mat::<$t, $c>::from_ptr(pointer))
+            }
+            pub fn ones(rows: i32, cols: i32) -> Result<Self> {
+                let pointer = Result::<*const MatPointer>::from(unsafe {
+                    ffi::cv_mat_ones(rows as i32, cols as i32, make_type($code, $c as i32))
+                })?;
+                Ok(Mat::<$t, $c>::from_ptr(pointer))
             }
         }
     };
 }
 
-impl_mat_initializer!(u8, 1, DataTypes::CV_8UC1);
-impl_mat_initializer!(u8, 2, DataTypes::CV_8UC2);
-impl_mat_initializer!(u8, 3, DataTypes::CV_8UC3);
-impl_mat_initializer!(f32, 1, DataTypes::CV_32FC1);
-impl_mat_initializer!(f32, 2, DataTypes::CV_32FC2);
-impl_mat_initializer!(f32, 3, DataTypes::CV_32FC3);
+impl_mat!(u8, 1, DataTypes::CV_8U);
+impl_mat!(u8, 2, DataTypes::CV_8U);
+impl_mat!(u8, 3, DataTypes::CV_8U);
+impl_mat!(i8, 1, DataTypes::CV_8S);
+impl_mat!(i8, 2, DataTypes::CV_8S);
+impl_mat!(i8, 3, DataTypes::CV_8S);
+impl_mat!(u16, 1, DataTypes::CV_16U);
+impl_mat!(u16, 2, DataTypes::CV_16U);
+impl_mat!(u16, 3, DataTypes::CV_16U);
+impl_mat!(i16, 1, DataTypes::CV_16S);
+impl_mat!(i16, 2, DataTypes::CV_16S);
+impl_mat!(i16, 3, DataTypes::CV_16S);
+impl_mat!(i32, 1, DataTypes::CV_32S);
+impl_mat!(i32, 2, DataTypes::CV_32S);
+impl_mat!(i32, 3, DataTypes::CV_32S);
+impl_mat!(f32, 1, DataTypes::CV_32F);
+impl_mat!(f32, 2, DataTypes::CV_32F);
+impl_mat!(f32, 3, DataTypes::CV_32F);
+impl_mat!(f64, 1, DataTypes::CV_64F);
+impl_mat!(f64, 2, DataTypes::CV_64F);
+impl_mat!(f64, 3, DataTypes::CV_64F);
 
 impl<T, const C: usize> Mat<T, C> {
-    pub(crate) fn new(pointer: *const MatPointer) -> Self {
+    pub fn new() -> Result<Self> {
+        let pointer = Result::from(unsafe { ffi::cv_new_mat() })?;
+        Ok(Self::from_ptr(pointer))
+    }
+    pub(crate) fn from_ptr(pointer: *const MatPointer) -> Self {
         Self {
             pointer,
             data_type: PhantomData,
@@ -277,12 +138,6 @@ impl<T, const C: usize> Mat<T, C> {
     }
 }
 
-impl<T, const C: usize> Default for Mat<T, C> {
-    fn default() -> Self {
-        Self::new(unsafe { ffi::cv_new_mat() })
-    }
-}
-
 impl<T, const C: usize> Drop for Mat<T, C> {
     fn drop(&mut self) {
         unsafe { ffi::cv_release_mat(self.pointer) }
@@ -292,6 +147,15 @@ impl<T, const C: usize> Drop for Mat<T, C> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn from_shape_test() {
+        let mat = Mat::<u8, 1>::from_shape(0, 0);
+        assert_eq!(mat.as_ref().err(), None);
+        let mat = mat.unwrap();
+        assert_eq!(mat.cols(), 0);
+        assert_eq!(mat.rows(), 0);
+    }
 
     #[test]
     fn data_type_test() {
@@ -318,7 +182,7 @@ mod tests {
 
     #[test]
     fn ones_test1() {
-        let mat = Mat::<u8, 1>::ones(4, 5);
+        let mat = Mat::<u8, 1>::ones(4, 5).unwrap();
         assert_eq!(mat.size(), 4 * 5);
         assert_eq!(mat.cols(), 5);
         assert_eq!(mat.rows(), 4);
@@ -328,7 +192,7 @@ mod tests {
 
     #[test]
     fn ones_test2() {
-        let mat = Mat::<u8, 3>::ones(1, 1);
+        let mat = Mat::<u8, 3>::ones(1, 1).unwrap();
         assert_eq!(mat.size(), 3);
         assert_eq!(mat.cols(), 1);
         assert_eq!(mat.rows(), 1);

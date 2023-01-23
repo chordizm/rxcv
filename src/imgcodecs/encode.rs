@@ -1,7 +1,13 @@
-use crate::core::{Bytes, Mat};
+use crate::{
+    core::{Bytes, Mat},
+    result::Result,
+};
 
 mod ffi {
-    use crate::core::{BytesPointer, MatPointer};
+    use crate::{
+        core::{BytesPointer, MatPointer},
+        ffi::FFIResult,
+    };
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -9,23 +15,16 @@ mod ffi {
             src: *const MatPointer,
             dst: *const BytesPointer,
             ext: *const std::ffi::c_char,
-        ) -> bool;
+        ) -> FFIResult<()>;
     }
 }
 
-pub trait Encode {
-    fn encode(&self, ext: Ext) -> Result<Bytes, &'static str>;
-}
-
-impl<T, const C: usize> Encode for Mat<T, C> {
-    fn encode(&self, ext: Ext) -> Result<Bytes, &'static str> {
+impl<T, const C: usize> Mat<T, C> {
+    pub fn encode(&self, ext: Ext) -> Result<Bytes> {
         let ext = std::ffi::CString::new(ext.to_string()).unwrap();
         let bytes = Bytes::default();
-        if unsafe { ffi::cv_imencode(self.pointer, bytes.pointer, ext.as_ptr()) } {
-            Ok(bytes)
-        } else {
-            Err("Failed to encode.")
-        }
+        Result::from(unsafe { ffi::cv_imencode(self.pointer, bytes.pointer, ext.as_ptr()) })?;
+        Ok(bytes)
     }
 }
 
@@ -44,11 +43,11 @@ impl std::string::ToString for Ext {
 }
 
 impl<const C: usize> Mat<u8, C> {
-    pub fn encode_png(&self) -> Result<Bytes, &'static str> {
+    pub fn encode_png(&self) -> Result<Bytes> {
         self.encode(Ext::PNG)
     }
 
-    pub fn encode_jpg(&self) -> Result<Bytes, &'static str> {
+    pub fn encode_jpg(&self) -> Result<Bytes> {
         self.encode(Ext::JPG)
     }
 }
@@ -56,7 +55,6 @@ impl<const C: usize> Mat<u8, C> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::imgcodecs::Decode;
 
     #[test]
     fn imencode_test() {
