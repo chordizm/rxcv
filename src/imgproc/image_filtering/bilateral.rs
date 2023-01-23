@@ -16,10 +16,23 @@ mod ffi {
     }
 }
 
+pub trait BilateralFilter
+where
+    Self: Sized,
+{
+    fn bilateral_filter(
+        &self,
+        d: i32,
+        sigma_coilor: f64,
+        sigma_space: f64,
+        border_type: BorderTypes,
+    ) -> Result<Self>;
+}
+
 macro_rules! impl_birateral_filter {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn bilateral_filter(
+        impl BilateralFilter for Mat<$t, $c> {
+            fn bilateral_filter(
                 &self,
                 d: i32,
                 sigma_coilor: f64,

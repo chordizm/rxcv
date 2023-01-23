@@ -14,10 +14,17 @@ mod ffi {
     }
 }
 
+pub trait PyrDown
+where
+    Self: Sized,
+{
+    fn pyr_down(&self, dstsize: Size, border_type: BorderTypes) -> Result<Self>;
+}
+
 macro_rules! impl_pyr_down {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn pyr_down(&self, dstsize: Size, border_type: BorderTypes) -> Result<Self>
+        impl PyrDown for Mat<$t, $c> {
+            fn pyr_down(&self, dstsize: Size, border_type: BorderTypes) -> Result<Self>
             where
                 Self: Sized,
             {

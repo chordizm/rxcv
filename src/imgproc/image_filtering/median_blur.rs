@@ -13,10 +13,17 @@ mod ffi {
     }
 }
 
+pub trait MedianBlur
+where
+    Self: Sized,
+{
+    fn median_blur(&self, ksize: i32) -> Result<Self>;
+}
+
 macro_rules! impl_median_blur {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn median_blur(&self, ksize: i32) -> Result<Self>
+        impl MedianBlur for Mat<$t, $c> {
+            fn median_blur(&self, ksize: i32) -> Result<Self>
             where
                 Self: Sized,
             {

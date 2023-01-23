@@ -15,14 +15,17 @@ mod ffi {
     }
 }
 
+pub trait SpatialGradient
+where
+    Self: Sized,
+{
+    fn spatial_gradient(&self, ksize: i32, border_type: BorderTypes) -> Result<(Self, Self)>;
+}
+
 macro_rules! impl_spatial_gradient {
     ($t:ty, $c:tt, $ddepth: expr) => {
-        impl Mat<$t, $c> {
-            pub fn spatial_gradient(
-                &self,
-                ksize: i32,
-                border_type: BorderTypes,
-            ) -> Result<(Self, Self)>
+        impl SpatialGradient for Mat<$t, $c> {
+            fn spatial_gradient(&self, ksize: i32, border_type: BorderTypes) -> Result<(Self, Self)>
             where
                 Self: Sized,
             {

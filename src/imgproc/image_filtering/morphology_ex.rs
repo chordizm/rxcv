@@ -25,10 +25,24 @@ mod ffi {
     }
 }
 
+pub trait MorphologyEx
+where
+    Self: Sized,
+{
+    fn morphology_ex(
+        &self,
+        op: MorphTypes,
+        kernel: Mat<u8, 1>,
+        anchor: Point,
+        iterations: i32,
+        border_type: BorderTypes,
+    ) -> Result<Self>;
+}
+
 macro_rules! impl_morphology_ex {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn morphology_ex(
+        impl MorphologyEx for Mat<$t, $c> {
+            fn morphology_ex(
                 &self,
                 op: MorphTypes,
                 kernel: Mat<u8, 1>,

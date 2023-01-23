@@ -23,10 +23,23 @@ mod ffi {
     }
 }
 
+pub trait Dilate
+where
+    Self: Sized,
+{
+    fn dilate(
+        &self,
+        kernel: Mat<u8, 1>,
+        anchor: Point,
+        iterations: i32,
+        border_type: BorderTypes,
+    ) -> Result<Self>;
+}
+
 macro_rules! impl_dilate {
     ($t:ty, $c:tt) => {
-        impl Mat<$t, $c> {
-            pub fn dilate(
+        impl Dilate for Mat<$t, $c> {
+            fn dilate(
                 &self,
                 kernel: Mat<u8, 1>,
                 anchor: Point,
