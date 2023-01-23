@@ -1,7 +1,7 @@
-use crate::{core::Mat, BorderTypes, DataTypes};
+use crate::{core::Mat, result::Result, BorderTypes, DataTypes};
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -14,38 +14,26 @@ mod ffi {
             anchor_y: i32,
             delta: f64,
             border_type: i32,
-        ) -> bool;
+        ) -> FFIResult<i32>;
     }
-}
-pub trait Filter2D {
-    fn filter2d(
-        &self,
-        kernel: Mat<f64, 1>,
-        anchor_x: i32,
-        anchor_y: i32,
-        delta: f64,
-        border_type: BorderTypes,
-    ) -> Result<Self, &'static str>
-    where
-        Self: Sized;
 }
 
 macro_rules! impl_filter2d {
     ($t:ty, $c:tt, $ddepth:expr) => {
-        impl Filter2D for Mat<$t, $c> {
-            fn filter2d(
+        impl Mat<$t, $c> {
+            pub fn filter2d(
                 &self,
                 kernel: Mat<f64, 1>,
                 anchor_x: i32,
                 anchor_y: i32,
                 delta: f64,
                 border_type: BorderTypes,
-            ) -> Result<Self, &'static str>
+            ) -> Result<Self>
             where
                 Self: Sized,
             {
-                let dst = Mat::default();
-                if unsafe {
+                let dst = Mat::new()?;
+                Result::from(unsafe {
                     ffi::cv_filter2d(
                         self.pointer,
                         dst.pointer,
@@ -56,11 +44,8 @@ macro_rules! impl_filter2d {
                         delta,
                         border_type.bits(),
                     )
-                } {
-                    Ok(dst)
-                } else {
-                    Err("Failed to Operation")
-                }
+                })?;
+                Ok(dst)
             }
         }
     };
@@ -85,7 +70,7 @@ mod tests {
         let data =
             ndarray::Array::from_shape_vec((3, 3, 1), vec![0., 1., 0., 1., -4., 1., 0., 1., 0.])
                 .unwrap();
-        let kernel = Mat::<f64, 1>::from(&data);
+        let kernel = Mat::<f64, 1>::from_ndarray(&data).unwrap();
         let dst = src
             .filter2d(kernel, -1, -1, 0., BorderTypes::BORDER_DEFAULT)
             .unwrap();
@@ -102,7 +87,7 @@ mod tests {
         let data =
             ndarray::Array::from_shape_vec((3, 3, 1), vec![0., 1., 0., 1., -4., 1., 0., 1., 0.])
                 .unwrap();
-        let kernel = Mat::<f64, 1>::from(&data);
+        let kernel = Mat::<f64, 1>::from_ndarray(&data).unwrap();
         let dst = src
             .filter2d(kernel, -1, -1, 0., BorderTypes::BORDER_DEFAULT)
             .unwrap();

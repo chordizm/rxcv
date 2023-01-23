@@ -1,7 +1,7 @@
-use crate::{core::Mat, BorderTypes};
+use crate::{core::Mat, result::Result, BorderTypes};
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -12,37 +12,25 @@ mod ffi {
             sigma_coilor: f64,
             sigma_space: f64,
             border_type: i32,
-        ) -> bool;
+        ) -> FFIResult<i32>;
     }
-}
-
-pub trait BilateralFilter {
-    fn bilateral_filter(
-        &self,
-        d: i32,
-        sigma_coilor: f64,
-        sigma_space: f64,
-        border_type: BorderTypes,
-    ) -> Result<Self, &'static str>
-    where
-        Self: Sized;
 }
 
 macro_rules! impl_birateral_filter {
     ($t:ty, $c:tt) => {
-        impl BilateralFilter for Mat<$t, $c> {
-            fn bilateral_filter(
+        impl Mat<$t, $c> {
+            pub fn bilateral_filter(
                 &self,
                 d: i32,
                 sigma_coilor: f64,
                 sigma_space: f64,
                 border_type: BorderTypes,
-            ) -> Result<Self, &'static str>
+            ) -> Result<Self>
             where
                 Self: Sized,
             {
-                let dst = Mat::default();
-                if unsafe {
+                let dst = Mat::new()?;
+                Result::from(unsafe {
                     ffi::cv_bilateral_filter(
                         self.pointer,
                         dst.pointer,
@@ -51,11 +39,8 @@ macro_rules! impl_birateral_filter {
                         sigma_space,
                         border_type.bits(),
                     )
-                } {
-                    Ok(dst)
-                } else {
-                    Err("Failed to Operation")
-                }
+                })?;
+                Ok(dst)
             }
         }
     };

@@ -16,6 +16,7 @@ fn main() {
         build.file(&file);
         println!("cargo:rerun-if-changed={}", file.to_str().unwrap());
     }
+    println!("cargo:rerun-if-changed=include");
     build
         .cpp(true)
         .warnings(true)
@@ -23,6 +24,7 @@ fn main() {
         .flag("-v")
         .flag("-g")
         .include(env::var("OPENCV_INCLUDE_DIR").unwrap_or("/usr/include/opencv4".to_string()))
+        .include("include")
         .compile("rxcv");
     println!(
         "cargo:rustc-link-search=native=/usr/lib/{}-linux-gnu",

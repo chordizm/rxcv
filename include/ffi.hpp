@@ -1,3 +1,5 @@
+#include <iostream>
+
 using namespace std;
 
 template <typename T>
@@ -8,7 +10,7 @@ struct FFIResult
 };
 
 template <typename T, class F>
-FFIResult<T> try_execute(F f)
+FFIResult<T> try_execute(F f, T v)
 {
     try
     {
@@ -16,6 +18,6 @@ FFIResult<T> try_execute(F f)
     }
     catch (std::exception &e)
     {
-        return {nullptr, (char *)(e.what())};
+        return {v, (char *)(e.what())};
     }
 };

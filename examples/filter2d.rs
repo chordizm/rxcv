@@ -1,4 +1,4 @@
-use rxcv::{imgproc::Filter2D, BorderTypes, Mat};
+use rxcv::{BorderTypes, Mat};
 
 fn main() {
     let data = include_bytes!("../mock/lenna.png");

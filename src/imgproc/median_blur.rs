@@ -1,7 +1,7 @@
-use crate::core::Mat;
+use crate::{core::Mat, result::Result};
 
 mod ffi {
-    use crate::core::MatPointer;
+    use crate::{core::MatPointer, ffi::FFIResult};
 
     #[link(name = "rxcv", kind = "static")]
     extern "C" {
@@ -9,51 +9,42 @@ mod ffi {
             src: *const MatPointer,
             dst: *const MatPointer,
             ksize: i32,
-        ) -> bool;
+        ) -> FFIResult<i32>;
     }
 }
 
-pub trait MedianBlur {
-    fn median_blur(&self, ksize: i32) -> Result<Self, &'static str>
+impl<T, const C: usize> Mat<T, C> {
+    pub fn median_blur(&self, ksize: i32) -> Result<Self>
     where
-        Self: Sized;
-    fn median_blur3x3(&self) -> Result<Self, &'static str>
+        Self: Sized,
+    {
+        let dst = Mat::new()?;
+        Result::from(unsafe { ffi::cv_median_blur(self.pointer, dst.pointer, ksize) })?;
+        Ok(dst)
+    }
+    pub fn median_blur3x3(&self) -> Result<Self>
     where
         Self: Sized,
     {
         self.median_blur(3)
     }
-    fn median_blur5x5(&self) -> Result<Self, &'static str>
+    pub fn median_blur5x5(&self) -> Result<Self>
     where
         Self: Sized,
     {
         self.median_blur(5)
     }
-    fn median_blur7x7(&self) -> Result<Self, &'static str>
+    pub fn median_blur7x7(&self) -> Result<Self>
     where
         Self: Sized,
     {
         self.median_blur(7)
     }
-    fn median_blur9x9(&self) -> Result<Self, &'static str>
+    pub fn median_blur9x9(&self) -> Result<Self>
     where
         Self: Sized,
     {
         self.median_blur(9)
-    }
-}
-
-impl<T, const C: usize> MedianBlur for Mat<T, C> {
-    fn median_blur(&self, ksize: i32) -> Result<Self, &'static str>
-    where
-        Self: Sized,
-    {
-        let dst = Mat::default();
-        if unsafe { ffi::cv_median_blur(self.pointer, dst.pointer, ksize) } {
-            Ok(dst)
-        } else {
-            Err("Failed to Operation")
-        }
     }
 }
 

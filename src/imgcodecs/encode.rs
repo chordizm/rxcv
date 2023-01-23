@@ -15,7 +15,7 @@ mod ffi {
             src: *const MatPointer,
             dst: *const BytesPointer,
             ext: *const std::ffi::c_char,
-        ) -> FFIResult<()>;
+        ) -> FFIResult<i32>;
     }
 }
 

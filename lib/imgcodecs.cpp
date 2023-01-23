@@ -1,7 +1,6 @@
 #include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
-
 #include "ffi.hpp"
 
 using MatResult = FFIResult<cv::Mat *>;
@@ -9,29 +8,33 @@ using namespace std;
 
 extern "C"
 {
-    FFIResult<void *> cv_imwrite(cv::Mat *img, const char *path)
+    FFIResult<int> cv_imwrite(cv::Mat *img, const char *path)
     {
-        return try_execute<void *>([&]()
-                                   { cv::imwrite(path, *img); return nullptr; });
+        return try_execute<int>([&]()
+                                { cv::imwrite(path, *img); return 0; },
+                                -1);
     }
 
     MatResult cv_imread(const char *path, int flags)
     {
         return try_execute<cv::Mat *>([&]()
-                                      { return new cv::Mat(cv::imread(path, flags)); });
+                                      { return new cv::Mat(cv::imread(path, flags)); },
+                                      nullptr);
     }
 
-    FFIResult<void *> cv_imencode(cv::Mat *img, std::vector<uchar> *dst, char *ext)
+    FFIResult<int> cv_imencode(cv::Mat *img, std::vector<uchar> *dst, char *ext)
     {
-        return try_execute<void *>([&]()
-                                   { cv::imencode(ext, *img, *dst); return nullptr; });
+        return try_execute<int>([&]()
+                                { cv::imencode(ext, *img, *dst); return 0; },
+                                -1);
     }
 
     MatResult cv_imdecode(uchar *data, int size, int flags)
     {
         vector<uchar> bytes(data, data + size);
         return try_execute<cv::Mat *>([&]()
-                                      { return new cv::Mat(cv::imdecode(bytes, flags)); });
+                                      { return new cv::Mat(cv::imdecode(bytes, flags)); },
+                                      nullptr);
     }
 
     std::vector<uchar> *cv_new_bytes()

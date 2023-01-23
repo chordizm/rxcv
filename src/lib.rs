@@ -1,12 +1,11 @@
 #![doc = include_str!("../README.md")]
 pub mod core;
+pub(crate) mod ffi;
 pub mod imgcodecs;
 pub mod imgproc;
+pub mod result;
 
 pub use crate::core::*;
-
-#[cfg(test)]
-use imgcodecs::Decode;
 
 #[cfg(test)]
 impl Mat<u8, 3> {

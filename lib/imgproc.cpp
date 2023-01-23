@@ -1,8 +1,8 @@
-#include <iostream>
 #include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include "ffi.hpp"
 
 using namespace std;
 
@@ -17,68 +17,39 @@ extern "C"
         int y;
     };
 
-    bool cv_cvt_color(cv::Mat *src, cv::Mat *dst, int code)
+    FFIResult<int> cv_cvt_color(cv::Mat *src, cv::Mat *dst, int code)
     {
-        try
-        {
-            cv::cvtColor(*src, *dst, code);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::cvtColor(*src, *dst, code); return 0; },
+                                -1);
     }
 
-    double cv_threshold(cv::Mat *src, cv::Mat *dst, int thresh, int maxval, int type)
+    FFIResult<double> cv_threshold(cv::Mat *src, cv::Mat *dst, int thresh, int maxval, int type)
     {
-        try
-        {
-            return cv::threshold(*src, *dst, thresh, maxval, type);
-        }
-        catch (std::exception &e)
-        {
-            return -1.0;
-        }
+        return try_execute<double>([&]()
+                                   { return cv::threshold(*src, *dst, thresh, maxval, type); },
+                                   0);
     }
 
-    bool cv_filter2d(cv::Mat *src, cv::Mat *dst, int ddepth, cv::Mat *kernel, int anchorX, int anchorY, double delta, int borderType)
+    FFIResult<int> cv_filter2d(cv::Mat *src, cv::Mat *dst, int ddepth, cv::Mat *kernel, int anchorX, int anchorY, double delta, int borderType)
     {
-        try
-        {
-            cv::filter2D(*src, *dst, ddepth, *kernel, cv::Point(anchorX, anchorY), delta, borderType);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::filter2D(*src, *dst, ddepth, *kernel, cv::Point(anchorX, anchorY), delta, borderType); return 0; },
+                                -1);
     }
 
-    bool cv_median_blur(cv::Mat *src, cv::Mat *dst, int ksize)
+    FFIResult<int> cv_median_blur(cv::Mat *src, cv::Mat *dst, int ksize)
     {
-        try
-        {
-            cv::medianBlur(*src, *dst, ksize);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::medianBlur(*src, *dst, ksize); return 0; },
+                                -1);
     }
 
-    bool cv_bilateral_filter(cv::Mat *src, cv::Mat *dst, int d, double sigmaColor, double sigmaSpace, int borderType)
+    FFIResult<int> cv_bilateral_filter(cv::Mat *src, cv::Mat *dst, int d, double sigmaColor, double sigmaSpace, int borderType)
     {
-        try
-        {
-            cv::bilateralFilter(*src, *dst, d, sigmaColor, sigmaSpace, borderType);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
+        return try_execute<int>([&]()
+                                { cv::bilateralFilter(*src, *dst, d, sigmaColor, sigmaSpace, borderType); return 0; },
+                                -1);
     }
 
     Contours *cv_new_contours()
