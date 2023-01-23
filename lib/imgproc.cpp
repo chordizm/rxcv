@@ -52,6 +52,13 @@ extern "C"
                                 -1);
     }
 
+    FFIResult<int> cv_find_contours(cv::Mat *src, Contours *contours, int mode, int method)
+    {
+        return try_execute<int>([&]()
+                                { cv::findContours(*src, *contours, mode, method); return 0; },
+                                -1);
+    }
+
     Contours *cv_new_contours()
     {
         return new Contours();
@@ -91,19 +98,6 @@ extern "C"
     void cv_release_contour(Contour *contour)
     {
         delete contour;
-    }
-
-    bool cv_find_contours(cv::Mat *src, Contours *contours, int mode, int method)
-    {
-        try
-        {
-            cv::findContours(*src, *contours, mode, method);
-            return true;
-        }
-        catch (std::exception &e)
-        {
-            return false;
-        }
     }
 
     double cv_contour_area(Contour *contour)
