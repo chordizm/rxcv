@@ -41,8 +41,7 @@ auto thresh = cv::threshold(src, dst, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTS
 
 ```rust,ignore
 use rxcv::{
-    imgcodecs::Decode,
-    imgproc::{Threshold, ThresholdTypes},
+    imgproc::{ThresholdTypes},
     Mat,
 };
 let data:&[u8] = &[1, 2, 3, 4, 5, 6];
@@ -72,7 +71,7 @@ cv::Mat src = cv::imdecode(data);
 ```
 
 ```rust,ignore
-use rxcv::{imgcodecs::Decode, Mat};
+use rxcv::Mat;
 let data:&[u8] = &[1, 2, 3, 4, 5, 6];
 let src = Mat::<u8, 3>::decode(data).unwrap();
 ```
