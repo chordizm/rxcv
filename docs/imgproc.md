@@ -37,7 +37,7 @@
 | convertMaps             |   ○    |
 | getAffineTransform      |        |
 | getPerspectiveTransform |        |
-| getRectSubPix           |        |
+| getRectSubPix           |   ○    |
 | getRotationMatrix2D     |        |
 | invertAffineTransform   |   ○    |
 | remap                   |        |
@@ -66,7 +66,6 @@
 | clipLine               |        |
 | drawContours           |        |
 | drawMarker             |        |
-| ellipse                |        |
 | ellipse                |        |
 | ellipse2Poly           |        |
 | fillConvexPoly         |        |

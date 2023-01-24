@@ -164,6 +164,13 @@ extern "C"
                                 -1);
     }
 
+    FFIResult<int> cv_get_rect_sub_pix(cv::Mat *src, Size patchSize, Point2f center, cv::Mat *patch, int patch_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::getRectSubPix(*src, cv::Size(patchSize.width, patchSize.height), cv::Point2f(center.x, center.y), *patch, patch_type); return 0; },
+                                -1);
+    }
+
     FFIResult<int> cv_invert_affine_transform(cv::Mat *src, cv::Mat *dst)
     {
         return try_execute<int>([&]()
