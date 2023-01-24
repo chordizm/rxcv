@@ -35,7 +35,7 @@ where
     ) -> Result<Self>;
 }
 
-macro_rules! impl_wrap_polar {
+macro_rules! impl_warp_polar {
     ($t:ty, $c:tt) => {
         impl WarpPolar for Mat<$t, $c> {
             fn warp_polar(
@@ -66,8 +66,8 @@ macro_rules! impl_wrap_polar {
     };
 }
 
-impl_wrap_polar!(f32, 1);
-impl_wrap_polar!(f64, 1);
+impl_warp_polar!(f32, 1);
+impl_warp_polar!(f64, 1);
 
 #[cfg(test)]
 mod tests {
