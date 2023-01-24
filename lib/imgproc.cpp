@@ -24,9 +24,11 @@ struct Size_t
 };
 typedef Point_t<int> Point2i;
 typedef Point2i Point;
+typedef Point_t<float> Point2f;
 typedef Size_t<int> Size2i;
 typedef Size2i Size;
 
+// ImageFiltering
 extern "C"
 {
     FFIResult<int> cv_bilateral_filter(cv::Mat *src, cv::Mat *dst, int d, double sigmaColor, double sigmaSpace, int borderType)
@@ -150,7 +152,35 @@ extern "C"
                                 { cv::sqrBoxFilter(*src, *dst, ddepth, cv::Size(ksize.width, ksize.height), cv::Point(anchor.x, anchor.y), normalize, border_type); return 0; },
                                 -1);
     }
+}
 
+// Geometric Image Transformations
+extern "C"
+{
+    FFIResult<int> cv_convert_maps(cv::Mat *map1, cv::Mat *map2, cv::Mat *dst1, cv::Mat *dst2, int dstmap1type, bool nninterpolation)
+    {
+        return try_execute<int>([&]()
+                                { cv::convertMaps(*map1, *map2, *dst1, *dst2, dstmap1type, nninterpolation); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_invert_affine_transform(cv::Mat *src, cv::Mat *dst)
+    {
+        return try_execute<int>([&]()
+                                { cv::invertAffineTransform(*src, *dst); return 0; },
+                                -1);
+    }
+
+    FFIResult<int> cv_warp_polar(cv::Mat *src, cv::Mat *dst, Size dsize, Point2f center, double max_radius, int flags)
+    {
+        return try_execute<int>([&]()
+                                { cv::warpPolar(*src, *dst, cv::Size(dsize.width, dsize.height), cv::Point2f(center.x, center.y), max_radius, flags); return 0; },
+                                -1);
+    }
+}
+
+extern "C"
+{
     FFIResult<int> cv_cvt_color(cv::Mat *src, cv::Mat *dst, int code)
     {
         return try_execute<int>([&]()

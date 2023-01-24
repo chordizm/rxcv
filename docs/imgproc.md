@@ -34,19 +34,17 @@
 
 | Function                | Status |
 | :---------------------- | :----: |
-| convertMaps             |        |
+| convertMaps             |   ○    |
 | getAffineTransform      |        |
 | getPerspectiveTransform |        |
 | getRectSubPix           |        |
 | getRotationMatrix2D     |        |
-| invertAffineTransform   |        |
-| linearPolar             |        |
-| logPolar                |        |
+| invertAffineTransform   |   ○    |
 | remap                   |        |
 | resize                  |        |
 | warpAffine              |        |
 | warpPerspective         |        |
-| warpPolar               |        |
+| warpPolar               |   ○    |
 
 ## Miscellaneous Image Transformations
 
