@@ -370,7 +370,7 @@ bitflags! {
         const INTER_NEAREST_EXACT = 6;
         const INTER_MAX = 7;
         const WARP_FILL_OUTLIERS = 8;
-        const WARP_INVERSE_MAP = 1;
+        const WARP_INVERSE_MAP = 16;
     }
 }
 
