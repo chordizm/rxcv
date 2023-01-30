@@ -40,7 +40,7 @@
 | getRectSubPix           |   ○    |
 | getRotationMatrix2D     |        |
 | invertAffineTransform   |   ○    |
-| remap                   |        |
+| remap                   |   ○    |
 | resize                  |        |
 | warpAffine              |        |
 | warpPerspective         |        |

@@ -178,6 +178,14 @@ extern "C"
                                 -1);
     }
 
+    // TODO: const Scalar & 	borderValue = morphologyDefaultBorderValue()
+    FFIResult<int> cv_remap(cv::Mat *src, cv::Mat *dst, cv::Mat *map1, cv::Mat *map2, bool interpolation, int border_mode)
+    {
+        return try_execute<int>([&]()
+                                { cv::remap(*src, *dst, *map1, *map2, interpolation, border_mode); return 0; },
+                                -1);
+    }
+
     FFIResult<int> cv_warp_polar(cv::Mat *src, cv::Mat *dst, Size dsize, Point2f center, double max_radius, int flags)
     {
         return try_execute<int>([&]()
