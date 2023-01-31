@@ -179,7 +179,7 @@ extern "C"
     }
 
     // TODO: const Scalar & 	borderValue = morphologyDefaultBorderValue()
-    FFIResult<int> cv_remap(cv::Mat *src, cv::Mat *dst, cv::Mat *map1, cv::Mat *map2, bool interpolation, int border_mode)
+    FFIResult<int> cv_remap(cv::Mat *src, cv::Mat *dst, cv::Mat *map1, cv::Mat *map2, int interpolation, int border_mode)
     {
         return try_execute<int>([&]()
                                 { cv::remap(*src, *dst, *map1, *map2, interpolation, border_mode); return 0; },
