@@ -26,34 +26,87 @@ mod ffi {
             dst: *const MatPointer,
             map1: *const MatPointer,
             map2: *const MatPointer,
+
             interpolation: i32,
             border_mode: i32,
         ) -> FFIResult<i32>;
     }
 }
 
-pub trait Remap<T, Map, Interpolation, const C: usize>
+pub trait Remap<Interpolation, Map1, const C1: usize, Map2, const C2: usize>
 where
     Self: Sized,
 {
     fn remap(
         &self,
-        map1: Mat<Map, C>,
-        map2: Mat<Map, C>,
+        map1: Mat<Map1, C1>,
+        map2: Mat<Map2, C2>,
         interpolation: Interpolation,
         border_mode: BorderTypes,
     ) -> Result<Self>;
 }
 
 macro_rules! impl_remap {
-    ($input_type:ty, $input_channel:tt, $map_type: ty, $interpolation: ty, $channel:tt) => {
-        impl Remap<$input_type, $map_type, $interpolation, $channel>
+    ($input_type:ty, $input_channel:tt, $interpolation: ty) => {
+        impl<T, const C: usize> Remap<$interpolation, f32, 2, T, C>
             for Mat<$input_type, $input_channel>
         {
             fn remap(
                 &self,
-                map1: Mat<$map_type, $channel>,
-                map2: Mat<$map_type, $channel>,
+                map1: Mat<f32, 2>,
+                _map2: Mat<T, C>,
+                interpolation: $interpolation,
+                border_mode: BorderTypes,
+            ) -> Result<Mat<$input_type, $input_channel>>
+            where
+                Self: Sized,
+            {
+                let map2 = Mat::<T, C>::new()?;
+                let dst = Mat::new()?;
+                Result::from(unsafe {
+                    ffi::cv_remap(
+                        self.pointer,
+                        dst.pointer,
+                        map1.pointer,
+                        map2.pointer,
+                        interpolation.bits(),
+                        border_mode.bits(),
+                    )
+                })?;
+                Ok(dst)
+            }
+        }
+        impl Remap<$interpolation, f32, 1, f32, 1> for Mat<$input_type, $input_channel> {
+            fn remap(
+                &self,
+                map1: Mat<f32, 1>,
+                map2: Mat<f32, 1>,
+                interpolation: $interpolation,
+                border_mode: BorderTypes,
+            ) -> Result<Mat<$input_type, $input_channel>>
+            where
+                Self: Sized,
+            {
+                let dst = Mat::new()?;
+                Result::from(unsafe {
+                    ffi::cv_remap(
+                        self.pointer,
+                        dst.pointer,
+                        map1.pointer,
+                        map2.pointer,
+                        interpolation.bits(),
+                        border_mode.bits(),
+                    )
+                })?;
+                Ok(dst)
+            }
+        }
+
+        impl Remap<$interpolation, i16, 2, u16, 1> for Mat<$input_type, $input_channel> {
+            fn remap(
+                &self,
+                map1: Mat<i16, 2>,
+                map2: Mat<u16, 1>,
                 interpolation: $interpolation,
                 border_mode: BorderTypes,
             ) -> Result<Mat<$input_type, $input_channel>>
@@ -78,9 +131,9 @@ macro_rules! impl_remap {
 }
 macro_rules! impl_remap_all {
     ($t:ty, $i: ty) => {
-        impl_remap!($t, 1, f32, $i, 1);
-        impl_remap!($t, 2, f32, $i, 1);
-        impl_remap!($t, 3, f32, $i, 1);
+        impl_remap!($t, 1, $i);
+        impl_remap!($t, 2, $i);
+        impl_remap!($t, 3, $i);
     };
 }
 
@@ -92,13 +145,11 @@ impl_remap_all!(f64, RemapInterpolationFlags);
 
 #[cfg(test)]
 mod tests {
-    use super::{RemapInterpolationFlags, *};
-
     macro_rules! impl_remap_test {
         ($name:ident, $src_type:ty, $channels:tt) => {
-            #[test]
-            fn $name() {
-                fn run_test(flag: RemapInterpolationFlags) {
+            mod $name {
+                use super::super::*;
+                fn run_test_32fc1(flag: RemapInterpolationFlags) {
                     let src = Mat::<$src_type, $channels>::from_shape(32, 32).unwrap();
                     let map1 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
                     let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
@@ -113,10 +164,61 @@ mod tests {
                     assert_eq!(dst.cols(), 16);
                     assert_eq!(dst.rows(), 16);
                 }
-                run_test(RemapInterpolationFlags::INTER_NEAREST);
-                run_test(RemapInterpolationFlags::INTER_LINEAR);
-                run_test(RemapInterpolationFlags::INTER_CUBIC);
-                run_test(RemapInterpolationFlags::INTER_LANCZOS4)
+                #[test]
+                fn test_32fc1() {
+                    run_test_32fc1(RemapInterpolationFlags::INTER_NEAREST);
+                    run_test_32fc1(RemapInterpolationFlags::INTER_LINEAR);
+                    run_test_32fc1(RemapInterpolationFlags::INTER_CUBIC);
+                    run_test_32fc1(RemapInterpolationFlags::INTER_LANCZOS4);
+                }
+
+                fn run_test_32fc2(flag: RemapInterpolationFlags) {
+                    let src = Mat::<$src_type, $channels>::from_shape(32, 32).unwrap();
+                    let map1 = Mat::<f32, 2>::from_shape(16, 16).unwrap();
+                    let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                    let dst = src
+                        .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                        .unwrap();
+                    assert_eq!(
+                        dst.data_type().unwrap().bits(),
+                        src.data_type().unwrap().bits()
+                    );
+                    assert_eq!(dst.channels(), $channels);
+                    assert_eq!(dst.cols(), 16);
+                    assert_eq!(dst.rows(), 16);
+                }
+
+                #[test]
+                fn test_32fc2() {
+                    run_test_32fc2(RemapInterpolationFlags::INTER_NEAREST);
+                    run_test_32fc2(RemapInterpolationFlags::INTER_LINEAR);
+                    run_test_32fc2(RemapInterpolationFlags::INTER_CUBIC);
+                    run_test_32fc2(RemapInterpolationFlags::INTER_LANCZOS4);
+                }
+
+                fn run_test_16sc2(flag: RemapInterpolationFlags) {
+                    let src = Mat::<$src_type, $channels>::from_shape(32, 32).unwrap();
+                    let map1 = Mat::<i16, 2>::from_shape(16, 16).unwrap();
+                    let map2 = Mat::<u16, 1>::from_shape(16, 16).unwrap();
+                    let dst = src
+                        .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                        .unwrap();
+                    assert_eq!(
+                        dst.data_type().unwrap().bits(),
+                        src.data_type().unwrap().bits()
+                    );
+                    assert_eq!(dst.channels(), $channels);
+                    assert_eq!(dst.cols(), 16);
+                    assert_eq!(dst.rows(), 16);
+                }
+
+                #[test]
+                fn test_16sc2() {
+                    run_test_16sc2(RemapInterpolationFlags::INTER_NEAREST);
+                    run_test_16sc2(RemapInterpolationFlags::INTER_LINEAR);
+                    run_test_16sc2(RemapInterpolationFlags::INTER_CUBIC);
+                    run_test_16sc2(RemapInterpolationFlags::INTER_LANCZOS4);
+                }
             }
         };
     }
@@ -154,25 +256,71 @@ mod i8 {
 
     #[cfg(test)]
     mod tests {
-        use super::RemapInterpolationFlags;
-        use crate::{imgproc::Remap, BorderTypes, Mat};
         macro_rules! impl_remap_test {
             ($name:ident, $c:tt, $interpolation: expr) => {
-                #[test]
-                fn $name() {
-                    let src = Mat::<i8, $c>::from_shape(32, 32).unwrap();
-                    let map1 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
-                    let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
-                    let dst = src
-                        .remap(map1, map2, $interpolation, BorderTypes::BORDER_CONSTANT)
-                        .unwrap();
-                    assert_eq!(
-                        dst.data_type().unwrap().bits(),
-                        src.data_type().unwrap().bits()
-                    );
-                    assert_eq!(dst.channels(), $c);
-                    assert_eq!(dst.cols(), 16);
-                    assert_eq!(dst.rows(), 16);
+                mod $name {
+                    use super::super::*;
+                    fn run_test_32fc1(flag: RemapInterpolationFlags) {
+                        let src = Mat::<i8, $c>::from_shape(32, 32).unwrap();
+                        let map1 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                        let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                        let dst = src
+                            .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                            .unwrap();
+                        assert_eq!(
+                            dst.data_type().unwrap().bits(),
+                            src.data_type().unwrap().bits()
+                        );
+                        assert_eq!(dst.channels(), $c);
+                        assert_eq!(dst.cols(), 16);
+                        assert_eq!(dst.rows(), 16);
+                    }
+                    #[test]
+                    fn test_32fc1() {
+                        run_test_32fc1(RemapInterpolationFlags::INTER_NEAREST);
+                    }
+
+                    fn run_test_32fc2(flag: RemapInterpolationFlags) {
+                        let src = Mat::<i8, $c>::from_shape(32, 32).unwrap();
+                        let map1 = Mat::<f32, 2>::from_shape(16, 16).unwrap();
+                        let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                        let dst = src
+                            .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                            .unwrap();
+                        assert_eq!(
+                            dst.data_type().unwrap().bits(),
+                            src.data_type().unwrap().bits()
+                        );
+                        assert_eq!(dst.channels(), $c);
+                        assert_eq!(dst.cols(), 16);
+                        assert_eq!(dst.rows(), 16);
+                    }
+
+                    #[test]
+                    fn test_32fc2() {
+                        run_test_32fc2(RemapInterpolationFlags::INTER_NEAREST);
+                    }
+
+                    fn run_test_16sc2(flag: RemapInterpolationFlags) {
+                        let src = Mat::<i8, $c>::from_shape(32, 32).unwrap();
+                        let map1 = Mat::<i16, 2>::from_shape(16, 16).unwrap();
+                        let map2 = Mat::<u16, 1>::from_shape(16, 16).unwrap();
+                        let dst = src
+                            .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                            .unwrap();
+                        assert_eq!(
+                            dst.data_type().unwrap().bits(),
+                            src.data_type().unwrap().bits()
+                        );
+                        assert_eq!(dst.channels(), $c);
+                        assert_eq!(dst.cols(), 16);
+                        assert_eq!(dst.rows(), 16);
+                    }
+
+                    #[test]
+                    fn test_16sc2() {
+                        run_test_16sc2(RemapInterpolationFlags::INTER_NEAREST);
+                    }
                 }
             };
         }
@@ -212,25 +360,71 @@ mod i32 {
 
     #[cfg(test)]
     mod tests {
-        use super::RemapInterpolationFlags;
-        use crate::{imgproc::Remap, BorderTypes, Mat};
         macro_rules! impl_remap_test {
             ($name:ident, $c:tt, $interpolation: expr) => {
-                #[test]
-                fn $name() {
-                    let src = Mat::<i32, $c>::from_shape(32, 32).unwrap();
-                    let map1 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
-                    let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
-                    let dst = src
-                        .remap(map1, map2, $interpolation, BorderTypes::BORDER_CONSTANT)
-                        .unwrap();
-                    assert_eq!(
-                        dst.data_type().unwrap().bits(),
-                        src.data_type().unwrap().bits()
-                    );
-                    assert_eq!(dst.channels(), $c);
-                    assert_eq!(dst.cols(), 16);
-                    assert_eq!(dst.rows(), 16);
+                mod $name {
+                    use super::super::*;
+                    fn run_test_32fc1(flag: RemapInterpolationFlags) {
+                        let src = Mat::<i32, $c>::from_shape(32, 32).unwrap();
+                        let map1 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                        let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                        let dst = src
+                            .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                            .unwrap();
+                        assert_eq!(
+                            dst.data_type().unwrap().bits(),
+                            src.data_type().unwrap().bits()
+                        );
+                        assert_eq!(dst.channels(), $c);
+                        assert_eq!(dst.cols(), 16);
+                        assert_eq!(dst.rows(), 16);
+                    }
+                    #[test]
+                    fn test_32fc1() {
+                        run_test_32fc1(RemapInterpolationFlags::INTER_NEAREST);
+                    }
+
+                    fn run_test_32fc2(flag: RemapInterpolationFlags) {
+                        let src = Mat::<i32, $c>::from_shape(32, 32).unwrap();
+                        let map1 = Mat::<f32, 2>::from_shape(16, 16).unwrap();
+                        let map2 = Mat::<f32, 1>::from_shape(16, 16).unwrap();
+                        let dst = src
+                            .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                            .unwrap();
+                        assert_eq!(
+                            dst.data_type().unwrap().bits(),
+                            src.data_type().unwrap().bits()
+                        );
+                        assert_eq!(dst.channels(), $c);
+                        assert_eq!(dst.cols(), 16);
+                        assert_eq!(dst.rows(), 16);
+                    }
+
+                    #[test]
+                    fn test_32fc2() {
+                        run_test_32fc2(RemapInterpolationFlags::INTER_NEAREST);
+                    }
+
+                    fn run_test_16sc2(flag: RemapInterpolationFlags) {
+                        let src = Mat::<i32, $c>::from_shape(32, 32).unwrap();
+                        let map1 = Mat::<i16, 2>::from_shape(16, 16).unwrap();
+                        let map2 = Mat::<u16, 1>::from_shape(16, 16).unwrap();
+                        let dst = src
+                            .remap(map1, map2, flag, BorderTypes::BORDER_CONSTANT)
+                            .unwrap();
+                        assert_eq!(
+                            dst.data_type().unwrap().bits(),
+                            src.data_type().unwrap().bits()
+                        );
+                        assert_eq!(dst.channels(), $c);
+                        assert_eq!(dst.cols(), 16);
+                        assert_eq!(dst.rows(), 16);
+                    }
+
+                    #[test]
+                    fn test_16sc2() {
+                        run_test_16sc2(RemapInterpolationFlags::INTER_NEAREST);
+                    }
                 }
             };
         }
