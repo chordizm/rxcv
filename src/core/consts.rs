@@ -74,6 +74,7 @@ pub struct PointBase<T> {
 }
 
 pub type Point2i = PointBase<i32>;
+pub type Point2f = PointBase<f32>;
 pub type Point = Point2i;
 
 impl Default for Point {
@@ -88,6 +89,18 @@ pub struct SizeT<T> {
     pub height: T,
 }
 
+impl<T> Default for SizeT<T>
+where
+    T: Default,
+{
+    fn default() -> Self {
+        Self {
+            width: T::default(),
+            height: T::default(),
+        }
+    }
+}
+
 pub type Size2i = SizeT<i32>;
 pub type Size = Size2i;
 
@@ -98,5 +111,30 @@ mod tests {
     #[test]
     fn make_type_test() {
         assert_eq!(make_type(DataTypes::CV_16U, 3), 18);
+    }
+
+    #[test]
+    fn data_type_test() {
+        assert_eq!(DataTypes::CV_8UC1.bits(), 0);
+        assert_eq!(DataTypes::CV_8UC2.bits(), 8);
+        assert_eq!(DataTypes::CV_8UC3.bits(), 16);
+        assert_eq!(DataTypes::CV_8SC1.bits(), 1);
+        assert_eq!(DataTypes::CV_8SC2.bits(), 9);
+        assert_eq!(DataTypes::CV_8SC3.bits(), 17);
+        assert_eq!(DataTypes::CV_16UC1.bits(), 2);
+        assert_eq!(DataTypes::CV_16UC2.bits(), 10);
+        assert_eq!(DataTypes::CV_16UC3.bits(), 18);
+        assert_eq!(DataTypes::CV_16SC1.bits(), 3);
+        assert_eq!(DataTypes::CV_16SC2.bits(), 11);
+        assert_eq!(DataTypes::CV_16SC3.bits(), 19);
+        assert_eq!(DataTypes::CV_32SC1.bits(), 4);
+        assert_eq!(DataTypes::CV_32SC2.bits(), 12);
+        assert_eq!(DataTypes::CV_32SC3.bits(), 20);
+        assert_eq!(DataTypes::CV_32FC1.bits(), 5);
+        assert_eq!(DataTypes::CV_32FC2.bits(), 13);
+        assert_eq!(DataTypes::CV_32FC3.bits(), 21);
+        assert_eq!(DataTypes::CV_64FC1.bits(), 6);
+        assert_eq!(DataTypes::CV_64FC2.bits(), 14);
+        assert_eq!(DataTypes::CV_64FC3.bits(), 22);
     }
 }

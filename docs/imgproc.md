@@ -34,19 +34,17 @@
 
 | Function                | Status |
 | :---------------------- | :----: |
-| convertMaps             |        |
+| convertMaps             |   ○    |
 | getAffineTransform      |        |
 | getPerspectiveTransform |        |
-| getRectSubPix           |        |
+| getRectSubPix           |   ○    |
 | getRotationMatrix2D     |        |
-| invertAffineTransform   |        |
-| linearPolar             |        |
-| logPolar                |        |
-| remap                   |        |
-| resize                  |        |
+| invertAffineTransform   |   ○    |
+| remap                   |   ○    |
+| resize                  |   ○    |
 | warpAffine              |        |
 | warpPerspective         |        |
-| warpPolar               |        |
+| warpPolar               |   ○    |
 
 ## Miscellaneous Image Transformations
 
@@ -68,7 +66,6 @@
 | clipLine               |        |
 | drawContours           |        |
 | drawMarker             |        |
-| ellipse                |        |
 | ellipse                |        |
 | ellipse2Poly           |        |
 | fillConvexPoly         |        |

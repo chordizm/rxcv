@@ -358,3 +358,25 @@ bitflags! {
         const MORPH_HITMISS  = 7;
     }
 }
+
+bitflags! {
+    pub struct InterpolationFlags: i32 {
+        const INTER_NEAREST = 0;
+        const INTER_LINEAR = 1;
+        const INTER_CUBIC = 2;
+        const INTER_AREA = 3;
+        const INTER_LANCZOS4 = 4;
+        const INTER_LINEAR_EXACT = 5;
+        const INTER_NEAREST_EXACT = 6;
+        const INTER_MAX = 7;
+        const WARP_FILL_OUTLIERS = 8;
+        const WARP_INVERSE_MAP = 16;
+    }
+}
+
+bitflags! {
+    pub struct WarpPolarMode: i32 {
+        const WARP_POLAR_LINEAR = 0;
+        const WARP_POLAR_LOG = 25;
+    }
+}
