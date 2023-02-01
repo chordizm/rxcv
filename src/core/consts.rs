@@ -89,6 +89,18 @@ pub struct SizeT<T> {
     pub height: T,
 }
 
+impl<T> Default for SizeT<T>
+where
+    T: Default,
+{
+    fn default() -> Self {
+        Self {
+            width: T::default(),
+            height: T::default(),
+        }
+    }
+}
+
 pub type Size2i = SizeT<i32>;
 pub type Size = Size2i;
 

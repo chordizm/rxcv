@@ -186,6 +186,13 @@ extern "C"
                                 -1);
     }
 
+    FFIResult<int> cv_resize(cv::Mat *src, cv::Mat *dst, Size size, double fx, double fy, int interpolation)
+    {
+        return try_execute<int>([&]()
+                                { cv::resize(*src, *dst, cv::Size(size.width, size.height), fx, fy, interpolation); return 0; },
+                                -1);
+    }
+
     FFIResult<int> cv_warp_polar(cv::Mat *src, cv::Mat *dst, Size dsize, Point2f center, double max_radius, int flags)
     {
         return try_execute<int>([&]()

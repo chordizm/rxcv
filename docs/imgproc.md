@@ -41,7 +41,7 @@
 | getRotationMatrix2D     |        |
 | invertAffineTransform   |   ○    |
 | remap                   |   ○    |
-| resize                  |        |
+| resize                  |   ○    |
 | warpAffine              |        |
 | warpPerspective         |        |
 | warpPolar               |   ○    |
