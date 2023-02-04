@@ -201,6 +201,17 @@ extern "C"
     }
 }
 
+// Miscellaneous Image Transformations
+extern "C"
+{
+    FFIResult<int> cv_adaptive_threshold(cv::Mat *src, cv::Mat *dst, double max_value, int adaptive_method, int threshold_type, int block_size, double c)
+    {
+        return try_execute<int>([&]()
+                                { cv::adaptiveThreshold(*src, *dst, max_value, adaptive_method, threshold_type, block_size, c); return 0; },
+                                -1);
+    }
+}
+
 extern "C"
 {
     FFIResult<int> cv_cvt_color(cv::Mat *src, cv::Mat *dst, int code)
