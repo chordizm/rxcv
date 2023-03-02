@@ -217,6 +217,13 @@ extern "C"
                                 { cv::blendLinear(*src1, *src2, *weights1, *weights2, *dst); return 0; },
                                 -1);
     }
+
+    FFIResult<int> cv_distance_transform(cv::Mat *src, cv::Mat *dst, cv::Mat *labels, int distance_type, int mask_size, int label_type)
+    {
+        return try_execute<int>([&]()
+                                { cv::distanceTransform(*src, *dst, *labels, distance_type, mask_size, label_type); return 0; },
+                                -1);
+    }
 }
 
 extern "C"
