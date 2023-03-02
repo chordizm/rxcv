@@ -50,8 +50,8 @@
 
 | Function          | Status |
 | :---------------- | :----: |
-| adaptiveThreshold |        |
-| blendLinear       |        |
+| adaptiveThreshold |   ○    |
+| blendLinear       |   ○    |
 | distanceTransform |        |
 | floodFill         |        |
 | integral          |        |

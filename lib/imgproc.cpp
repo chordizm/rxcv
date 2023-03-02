@@ -210,6 +210,13 @@ extern "C"
                                 { cv::adaptiveThreshold(*src, *dst, max_value, adaptive_method, threshold_type, block_size, c); return 0; },
                                 -1);
     }
+
+    FFIResult<int> cv_blend_linear(cv::Mat *src1, cv::Mat *src2, cv::Mat *weights1, cv::Mat *weights2, cv::Mat *dst)
+    {
+        return try_execute<int>([&]()
+                                { cv::blendLinear(*src1, *src2, *weights1, *weights2, *dst); return 0; },
+                                -1);
+    }
 }
 
 extern "C"
