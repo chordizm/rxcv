@@ -84,6 +84,18 @@ impl Default for Point {
 }
 
 #[repr(C)]
+pub struct RectBase<T> {
+    pub x: T,
+    pub y: T,
+    pub width: T,
+    pub height: T,
+}
+
+pub type Rect2i = RectBase<i32>;
+pub type Rect2f = RectBase<f32>;
+pub type Rect = Rect2i;
+
+#[repr(C)]
 pub struct SizeT<T> {
     pub width: T,
     pub height: T,

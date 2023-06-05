@@ -28,6 +28,17 @@ typedef Point_t<float> Point2f;
 typedef Size_t<int> Size2i;
 typedef Size2i Size;
 
+template <typename T>
+struct Rect_t
+{
+    T x;
+    T y;
+    T width;
+    T height;
+};
+typedef Rect_t<int> Rect2i;
+typedef Rect2i Rect;
+
 // ImageFiltering
 extern "C"
 {
@@ -223,6 +234,21 @@ extern "C"
         return try_execute<int>([&]()
                                 { cv::distanceTransform(*src, *dst, *labels, distance_type, mask_size, label_type); return 0; },
                                 -1);
+    }
+
+    FFIResult<Rect> cv_flood_fill(cv::Mat *src, cv::Mat *mask, Point seed_point, cv::Mat *new_val, cv::Mat *lo_diff, cv::Mat *up_diff, int flags)
+    {
+        return try_execute<Rect>([&]()
+                                 { 
+                                    cv::Rect rect;
+                                    cv::floodFill(*src, *mask, cv::Point(seed_point.x, seed_point.y), cv::Scalar(new_val->at<double>(cv::Point(0, 0))), &rect, cv::Scalar(lo_diff->at<double>(cv::Point(0, 0))), cv::Scalar(up_diff->at<double>(cv::Point(0, 0))), flags);
+                                    return Rect {
+                                        rect.x,
+                                        rect.y,
+                                        rect.width,
+                                        rect.height
+                                    }; },
+                                 Rect{0, 0, 0, 0});
     }
 }
 

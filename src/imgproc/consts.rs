@@ -380,3 +380,10 @@ bitflags! {
         const WARP_POLAR_LOG = 25;
     }
 }
+
+bitflags! {
+    pub struct Connectivity: i32 {
+        const NEIGHBORHOODS_4 = 4;
+        const NEIGHBORHOODS_8 = 4;
+    }
+}
